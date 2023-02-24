@@ -1,0 +1,6 @@
+{
+    "api_key": "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",
+    "mode": "zsh",
+    "big_model": "text-davinci-003",
+    "small_model": "text-curie-001"
+}
