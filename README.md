@@ -2,6 +2,8 @@
 NLP command line helper using OpenAI api
 
 To build:
+ - change <code>config.json</code>
+ - build
 <pre><code>$ ./build.sh</code></pre>
 
 
