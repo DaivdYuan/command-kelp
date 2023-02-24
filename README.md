@@ -8,9 +8,9 @@ To build:
 To use:
 <pre><code>$ kelp [options] [your text here]</pre></code>
 
-###Functionalities
+### Functionalities
 TODO
 
-###Options
+### Options
 TODO
 
