@@ -1,18 +1,47 @@
 import os
 import openai
 import sys
-import json
+import json, sys
+from subprocess import Popen, PIPE, STDOUT
 
-CONFIG_PATH = "/usr/local/lib/command_helper/config.json"
+from .systems import run_command
+from .shells import shell
+from .logs import *
 
-# read config file
-with open(CONFIG_PATH, "r") as f:
-    config = json.load(f)
+if os.environ.get("OPENAI_API_KEY") is None:
+    warning_print("Warning: OPENAI_API_KEY environment variable not found. Please set it to your OpenAI API key.")
+    exit()
 
-openai.api_key = config["api_key"]
-mode = config["mode"]
-small_model = config["small_model"]
-big_model = config["big_model"]
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+mode = os.environ.get("KELP_SHELL")
+small_model = "text-davinci-003"
+big_model = "text-curie-001"
+
+#######################
+
+def parse_history_command():
+    # get from `KELP_HISTORY` environment variable
+    history = os.environ.get("KELP_HISTORY")
+    if history is None or history == "":
+        # get from `HISTFILE` environment variable
+        raise NotImplementedError
+    
+    #output("History:", history)
+    
+    # get the last command not starting with "kelp"
+    last_command = None
+    for command in history.split("\n")[::-1]:
+        if not command.startswith("kelp"):
+            last_command = command
+            break
+
+    return last_command
+
+def sanitize(text):
+    # get only the first line, and strip the newline character
+    return text.split("\n")[0].strip()
+
+#######################
 
 def get_command(text):
     # get number of words in the text
@@ -20,7 +49,7 @@ def get_command(text):
     
     if num_words > 30:
         # too big, print warning
-        colored_print("red", "Warning: The text is too long. Using the first 30 words.")
+        warning_print("Warning: The text is too long. Using the first 30 words.")
         text = " ".join(text.split()[:30])
     model = big_model
     
@@ -34,7 +63,21 @@ def get_command(text):
         frequency_penalty=0.2,
         presence_penalty=0
     )
-    return response.choices[0].text
+    return sanitize(response.choices[0].text)
+
+def correct_command(text):
+    info_print("Correcting:", text)
+    prompt = f"This {mode} command is wrong:\n{text}\n\nCorrect and meaningful command:\n$"
+    response = openai.Completion.create(
+        model=big_model,
+        prompt=prompt,
+        temperature=0,
+        max_tokens=100,
+        top_p=1,
+        frequency_penalty=0.2,
+        presence_penalty=0
+    )
+    return sanitize(response.choices[0].text)
 
 def explain_command(text):
     prompt = f"Explain this {mode} command:\n{text}\n\nExplanation:\n$"
@@ -62,29 +105,6 @@ def check_dangerous_command(text):
     )
     return response.choices[0].text
 
-def change_terminal_color(color):
-    if color == "red":
-        print("\033[91m", end="")
-    elif color == "green":
-        print("\033[92m", end="")
-    elif color == "yellow":
-        print("\033[93m", end="")
-    elif color == "blue":
-        print("\033[94m", end="")
-    elif color == "purple":
-        print("\033[95m", end="")
-    elif color == "cyan":
-        print("\033[96m", end="")
-    elif color == "white":
-        print("\033[97m", end="")
-    else:
-        print("\033[97m", end="")
-
-def colored_print(color, *args):
-    change_terminal_color(color)
-    print(*args)
-    change_terminal_color("white")
-
 def get_options(args):
     options = []
     st = 0
@@ -98,8 +118,7 @@ def get_options(args):
     return options, st
 
 
-if __name__ == "__main__":
-
+def main():
     # get options starting with "-"
     options, st = get_options(sys.argv[1:])
 
@@ -122,45 +141,56 @@ if __name__ == "__main__":
 
     #get arguments for the command
     args = sys.argv[1 + st:]
-    #get the text to convert
-    text = " ".join(args)
-    #get the command
-    command = get_command(text)
+
+    if args == [] or args == ["fuck"]:
+        # enable fuck mode
+        hist_command = parse_history_command()
+        if hist_command is None:
+            info_print("No last command found")
+            exit(1)
+        else:
+            command = correct_command(hist_command)
+    else:
+        #get the text to convert
+        text = " ".join(args)
+        #get the command
+        command = get_command(text)
+    
     #print the command in purple
-    colored_print("purple", "\n>", command, "\n")
+    suggestion_print("\n>", command, "\n")
 
     if EXPLAIN:
         explanation = explain_command(command)
-        colored_print("cyan", "#", command)
-        print(explanation)
+        explain_print("#", command)
+        info_print(explanation)
         print("")
 
     input_cmd = ""
     while input_cmd != "y" and input_cmd != "n":
         if not FORCE:
-            input_cmd = input("Execute command? (y/n/\033[4me\033[0mxplain/\033[4mc\033[0maution]): ")
+            input_cmd = input("\033[1mExecute command?\033[0m (y/n/\033[4me\033[0mxplain/\033[4mc\033[0maution]): ")
         else:
             input_cmd = input()
 
         if FORCE or input_cmd == "y":
-            colored_print("yellow", "$", command)
-            os.system(command)
-            print("")
+            running_print("$", command)
+            os.system(f"eval \'{command}\' 1>&2")
+            output("")
             break
         elif input_cmd == "c":
-            colored_print("red", "?", command)
+            warning_print("?", command)
             response = check_dangerous_command(command)
-            print(response)
+            info_print("Is this dangerous?  ", response)
         elif input_cmd == "e":
             explanation = explain_command(command)
-            colored_print("cyan", command)
-            print(explanation)
-        print("")
+            explain_print("#", command)
+            info_print(explanation)
+        output("")
 
     # whether copy the command to clipboard or not
     if not COPY:
-        input_cmd = input("Copy command to clipboard? (y/[n]): ")
+        input_cmd = input("\033[1mCopy command to clipboard?\033[0m (y/[n]): ")
     if COPY or input_cmd == "y":
-        colored_print("green", "Command copied to clipboard.\n")
+        success_print("Command copied to clipboard.\n")
         os.system(f"echo '{command}' | pbcopy")
 
