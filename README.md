@@ -12,7 +12,6 @@ Command-Kelp is a command-line tool designed to simplify your interaction with t
     - [Correcting Commands](#correcting-commands)
     - [Interactive Command Menu](#interactive-command-menu)
   - [Contributing](#contributing)
-  - [License](#license)
 
 ## Installation
 
@@ -56,6 +55,7 @@ After generating a command or correcting a previous one, Command-Kelp will prese
 
 Contributions to Command-Kelp are welcome! Feel free to open issues and pull requests in the [GitHub repository](https://github.com/DaivdYuan/command-kelp).
 
-## License
+To use:
+<pre><code>$ kelp [options] [your text here]</pre></code>
 
 Command-Kelp is released under the [MIT License](https://opensource.org/licenses/MIT).
