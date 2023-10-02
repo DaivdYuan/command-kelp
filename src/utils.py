@@ -3,6 +3,10 @@ import os, json
 
 DEVNULL = open(os.devnull, 'w')
 
+def sanitize_one_line(text):
+    # get only the first line, and strip the newline character
+    return text.split("\n")[0].strip()
+
 def memoize(fn):
     """Caches previous calls to the function."""
     memo = {}
