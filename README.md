@@ -44,9 +44,9 @@ $ kelp [options] [description]
 You can use the `kelp` command along with a description to generate a corresponding command. Simply provide a brief description of what you want to achieve, and Command-Kelp will suggest the appropriate command.
 
 ```bash
-$ kelp tar compress data/
+$ kelp compress ./data into a tar.gz file
 
-> tar -czvf data.tar.gz data 
+> tar -czvf data.tar.gz ./data 
 ```
 
 ### Correcting Commands
@@ -54,12 +54,24 @@ $ kelp tar compress data/
 Similar to the well-known `thefuck` package, Command-Kelp can correct your previous command if you mistype it or make a syntax error. Just type `kelp` or `kelp fuck`, and Command-Kelp will attempt to correct the previous command.
 
 ```bash
+# WRONG command
 $ df-h
 command not found: df-h
 
+# corrected
 $ kelp
 > df -h
 
+```
+
+```bash
+# WRONG command
+$  npm create app react --typescript
+npm ERR! could not determine executable to run
+
+# corrected
+$ kelp
+> npx create-react-app my-app --template typescript 
 ```
 
 ### Interactive Command Menu
