@@ -8,6 +8,7 @@ Command-Kelp is a command-line tool designed to simplify your interaction with t
 
 - [Command-Kelp: Natural Language Command Line Helper](#command-kelp-natural-language-command-line-helper)
   - [Table of Contents](#table-of-contents)
+  - [Quick Start](#quick-start)
   - [Installation](#installation)
   - [Usage](#usage)
     - [General](#general)
@@ -16,19 +17,38 @@ Command-Kelp is a command-line tool designed to simplify your interaction with t
     - [Interactive Command Menu](#interactive-command-menu)
   - [Contributing](#contributing)
 
+## Quick Start
+
+To correct the previous command:
+```bash
+$ kelp 
+```
+
+To generate a command from a description:
+```bash
+$ kelp <your instructions here>
+```
+More examples in the [Usage](#usage) section.
+
 ## Installation
 
 To install Command-Kelp, you need to have Python 3.x and `pip` installed. Run the following command:
 
 ```bash
-git clone git@github.com:DaivdYuan/command-kelp.git
-cd command-kelp && pip install .
+$ git clone git@github.com:DaivdYuan/command-kelp.git
+$ cd command-kelp && pip install .
 ```
 
 Run `kelp` for the first time to auto-configure Command-Kelp.
 
 To use Command-Kelp, you need to set the environment variable `OPENAI_API_KEY` to your OpenAI API key. You can find your API key [here](https://beta.openai.com/account/api-keys). 
 
+To use the automatic api key configuration, just run kelp again:
+```bash
+$ kelp
+```
+
+Alternatively, you can set the environment variable manually, preferably in your `.bashrc` or `.zshrc` file:
 ```bash
 export OPENAI_API_KEY="your_api_key"
 ```
@@ -44,6 +64,13 @@ $ kelp [options] [description]
 ### Generating Commands
 
 You can use the `kelp` command along with a description to generate a corresponding command. Simply provide a brief description of what you want to achieve, and Command-Kelp will suggest the appropriate command.
+
+```bash
+$ kelp remove the latest commit in git
+
+> git reset --hard HEAD~1
+```
+
 
 ```bash
 $ kelp compress ./data into a tar.gz file
