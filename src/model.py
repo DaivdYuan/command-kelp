@@ -1,5 +1,7 @@
 import os, openai
 from .utils import sanitize_one_line
+from .logs import *
+from .main import api_key_setup_wizard
 
 class GenericModel:
     def __init__(self, model_name):
@@ -8,15 +10,27 @@ class GenericModel:
         self.mode = os.environ.get("KELP_SHELL")
 
     def query_model(self, prompt, sanitize=True):
-        response = openai.Completion.create(
-            engine=self.model_name,
-            temperature=0,
-            max_tokens=100,
-            top_p=1,
-            frequency_penalty=0.2,
-            presence_penalty=0,
-            prompt=prompt
-        )
+        try:
+            response = openai.Completion.create(
+                engine=self.model_name,
+                temperature=0,
+                max_tokens=100,
+                top_p=1,
+                frequency_penalty=0.2,
+                presence_penalty=0,
+                prompt=prompt
+            )
+        except openai.error.AuthenticationError:
+            warning_print("Warning: OPENAI_API_KEY environment variable not found or is not valid. Please set it to your OpenAI API key.")
+            api_key_setup_wizard()
+            exit()
+        except Exception as e:
+            warning_print("FATAL ERROR:", repr(e))
+            running_print("\nPlease check your connection and the api key.")
+            if (input("Open api key setup wizard? [y/n]") == "y"):
+                api_key_setup_wizard()
+            exit()
+
         if sanitize:
             return sanitize_one_line(response.choices[0].text)
         else:

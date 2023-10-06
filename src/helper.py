@@ -8,9 +8,11 @@ from .systems import run_command
 from .shells import shell
 from .logs import *
 from .model import GPT35Model
+from .main import api_key_setup_wizard
 
 if os.environ.get("OPENAI_API_KEY") is None:
     warning_print("Warning: OPENAI_API_KEY environment variable not found. Please set it to your OpenAI API key.")
+    api_key_setup_wizard()
     exit()
 
 #######################
@@ -83,6 +85,7 @@ def main():
             info_print("No last command found")
             exit(1)
         else:
+            info_print("Correcting previous command: " + hist_command)
             command = model.correct_command(hist_command)
     else:
         #get the text to convert

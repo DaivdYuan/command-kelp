@@ -1,3 +1,5 @@
+<img src="./resources/icon.png" align="right" width="150px"/>
+
 # Command-Kelp: Natural Language Command Line Helper
 
 Command-Kelp is a command-line tool designed to simplify your interaction with the command line by using natural language commands. It provides three main functions to enhance your command-line experience: generating commands from descriptions, correcting previous commands, and offering an interactive menu for executing, explaining, and copying commands.
