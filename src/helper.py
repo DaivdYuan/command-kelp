@@ -105,7 +105,7 @@ def main():
     input_cmd = ""
     while input_cmd != "y" and input_cmd != "n":
         if not FORCE:
-            input_cmd = input("\033[1mExecute command?\033[0m (y/n/\033[4me\033[0mxplain/\033[4mc\033[0maution]): ")
+            input_cmd = input("\033[1mExecute command?\033[0m (y/n/\033[4me\033[0mxplain/\033[4mc\033[0maution): ")
         else:
             input_cmd = input()
 
